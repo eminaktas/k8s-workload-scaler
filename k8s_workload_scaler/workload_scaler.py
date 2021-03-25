@@ -51,16 +51,17 @@ class WorkloadScaler(Kubectl):
                     raise Exception
 
                 # Control if scaling is already met
-                if replicas == self.max_number or replicas == self.min_number:
+                if (replicas == self.max_number or replicas == self.min_number)\
+                        and self.max_number < new_replicas < self.min_number:
                     self.logger.info(f"current replica number is already at "
                                      f"max:{self.max_number}/min:{self.min_number}"
                                      f" current replicas: {replicas}")
                     return None
-                if new_replicas > self.max_number:
+                if replicas > self.max_number:
                     self.logger.warning(f"current replica number is more than max_number"
                                         f" scaling to max_number: {self.max_number}")
                     return self.max_number
-                elif new_replicas < self.min_number:
+                elif replicas < self.min_number:
                     self.logger.warning(f"current replica number is less than min_number"
                                         f" scaling to min_number: {self.min_number}")
                     return self.min_number
