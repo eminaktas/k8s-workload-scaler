@@ -1,12 +1,8 @@
 ---
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: v1
+kind: ServiceAccount
 metadata:
   name: k8s-workload-scaler
-rules:
-- apiGroups: [""]
-  resources: ["deployment", "replicasets", "statefulsets", "replicasets", "replicationcontrollers"]
-  verbs: ["list", "patch"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -14,12 +10,13 @@ metadata:
   name: k8s-workload-scaler
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: k8s-workload-scaler
+  apiGroup: ""
   namespace: default
 roleRef:
   kind: ClusterRole
-  name: replication-controller
-  apiGroup: rbac.authorization.k8s.io
+  name: cluster-admin
+  apiGroup: ""
 ---
 apiVersion: v1
 kind: Pod
@@ -27,6 +24,7 @@ metadata:
   name: k8s-workload-scaler
   namespace: monitoring
 spec:
+  serviceAccountName: k8s-workload-scaler
   restartPolicy: Always
   securityContext:
     runAsUser: 0
