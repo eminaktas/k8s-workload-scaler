@@ -1,0 +1,79 @@
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: k8s-workload-scaler
+rules:
+- apiGroups: [""]
+  resources: ["deployment", "replicasets", "statefulsets", "replicasets", "replicationcontrollers"]
+  verbs: ["list", "patch"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: k8s-workload-scaler
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: replication-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k8s-workload-scaler
+  namespace: monitoring
+spec:
+  restartPolicy: Always
+  securityContext:
+    runAsUser: 0
+    fsGroup: 0
+  containers:
+    - name: k8s-workload-scaler
+      image: eminaktas/k8s-k8s-workload-scaler:latest
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh"]
+      args:
+        - -c
+        - >-
+            python3 /usr/workload-scaler/k8s_workload_scaler/run.py
+            -w $(workload)
+            -n $(scale-name)
+            -ns $(namespace)
+            -s $(scaling-number)
+            -max $(max-pod-number)
+            -min $(min-pod-number)
+            -ti $(time-interval)
+            -mt $(managment-type)
+            -ph $(prometheus-host)
+            -pp $(prometheus-port)
+            -son $(scaling-out-name)
+            -sin $(scaling-in-name)
+      env:
+        - name: workload
+          value: "Deployment"
+        - name: scale-name
+          value: "php-apache"
+        - name: namespace
+          value: "default"
+        - name: scaling-number
+          value: "1"
+        - name: max-pod-number
+          value: "10"
+        - name: min-pod-number
+          value: "2"
+        - name: time-interval
+          value: "60"
+        - name: managment-type
+          value: "prometheus_alert_api"
+        - name: prometheus-host
+          value: "prometheus-service"
+        - name: prometheus-port
+          value: "8080"
+        - name: scaling-out-name
+          value: "php-apache-scaling-out"
+        - name: scaling-in-name
+          value: "php-apache-scaling-in"
