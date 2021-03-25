@@ -35,13 +35,13 @@ class ControlReplicasTest(WorkloadScalerTestCase):
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
     def test_control_replica_min(self, mock_get_replica_info):
         mock_get_replica_info.return_value = {'replicas': 2}
-        result = self.workload_scaler.control_replicas('scaling_out')
+        result = self.workload_scaler.control_replicas('scaling_in')
         self.assertEqual(result, None)
 
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
     def test_control_replica_less_min(self, mock_get_replica_info):
         mock_get_replica_info.return_value = {'replicas': 0}
-        result = self.workload_scaler.control_replicas('scaling_out')
+        result = self.workload_scaler.control_replicas('scaling_in')
         self.assertEqual(result, 2)
 
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
