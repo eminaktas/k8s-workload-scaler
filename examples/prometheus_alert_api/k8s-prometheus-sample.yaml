@@ -33,7 +33,7 @@ spec:
     fsGroup: 0
   containers:
     - name: k8s-workload-scaler
-      image: eminaktas/k8s-k8s-workload-scaler:latest
+      image: eminaktas/k8s-workload-scaler
       imagePullPolicy: IfNotPresent
       command: ["/bin/sh"]
       args:
