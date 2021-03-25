@@ -1,4 +1,4 @@
-from workload_scaler import WorkloadScaler
+from k8s_workload_scaler.workload_scaler import WorkloadScaler
 
 import requests
 import logging

@@ -1,11 +1,10 @@
-from kubectl import Kubectl
-import abc
+from k8s_workload_scaler.kubectl import Kubectl
 import logging
 
 __author__ = "Emin AKTAS <eminaktas34@gmail.com>"
 
 
-class WorkloadScaler(abc.ABC, Kubectl):
+class WorkloadScaler(Kubectl):
     """
     WorkloadScaler class
     """
@@ -72,7 +71,7 @@ class WorkloadScaler(abc.ABC, Kubectl):
                     return new_replicas
             else:
                 self.logger.error(f"{self.name} (namespace: {self.namespace}, workload: {self.workload}) not found")
-                raise Exception
+                raise Exception("replica_info not found")
         except Exception as e:
             self.logger.error(f"Exception at control_replicas: {e}")
             return None

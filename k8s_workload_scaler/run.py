@@ -1,7 +1,7 @@
 import logging
-from time import sleep
 import argparse
-from prometheus_alert_api import PrometheusAlertAPI
+from time import sleep
+from k8s_workload_scaler.prometheus_alert_api import PrometheusAlertAPI
 
 __author__ = "Emin AKTAS <eminaktas34@gmail.com>"
 
@@ -30,9 +30,7 @@ SUPPORTED_MANAGEMENT_TYPE = [
 
 # parse_args function allows us to set the parameters in commandline
 def parse_args():
-    parent_parser = argparse.ArgumentParser(add_help=False)
-    argument_parser = argparse.ArgumentParser(
-        description="This program for scaling the K8s workloads", parents=[parent_parser])
+    argument_parser = argparse.ArgumentParser(description="This program for scaling the K8s workloads")
     argument_parser.add_argument('-w', '--worklod', dest=WORKLOAD, required=True, type=str,
                                  help="<Required> Enter a workload name"
                                       f"Supported workloads: {SUPPORTED_WORKLOAD}")
