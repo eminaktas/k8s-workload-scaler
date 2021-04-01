@@ -2,6 +2,7 @@ import logging
 import argparse
 from time import sleep
 from k8s_workload_scaler.prometheus_alert_api import PrometheusAlertAPI
+from k8s_workload_scaler.prometheus_metric_api import PrometheusMetricAPI
 
 __author__ = "Emin AKTAS <eminaktas34@gmail.com>"
 
@@ -13,10 +14,22 @@ MAX_NUMBER = 'max_number'
 MIN_NUMBER = 'min_number'
 TIME_INTERVAL = 'delay'
 MANAGEMENT_TYPE = 'management_type'
+
+# PROMETHEUS HOST INFORMATION
 HOST = 'host'
 PORT = 'port'
+
+# PROMETHEUS ALERT INFORMATION
 SCALING_OUT_NAME = 'scaling_out_name'
 SCALING_IN_NAME = 'scaling_in_name'
+
+# PROMETHEUS METRIC INFORMATION
+METRIC_NAME = 'metric_name'
+LABEL_NAME = 'label_name'
+LABEL_VALUE = 'label_value'
+SCALING_OUT_THRESHOLD_VALUE = 'scaling_out_threshold_value'
+SCALING_IN_THRESHOLD_VALUE = 'scaling_in_threshold_value'
+
 SUPPORTED_WORKLOAD = [
     'Deployment',
     'StatefulSet',
@@ -25,6 +38,7 @@ SUPPORTED_WORKLOAD = [
 ]
 SUPPORTED_MANAGEMENT_TYPE = [
     'prometheus_alert_api',
+    'prometheus_metric_api',
 ]
 
 
@@ -62,6 +76,26 @@ def parse_args():
                                  type=str,
                                  help="<Optional> Enter an alert name for scaling in"
                                       " if management type is prometheus_alert_api")
+    argument_parser.add_argument('-mn', '--metric-name', dest=METRIC_NAME, required=False,
+                                 type=str,
+                                 help="<Optional> Enter a metric name for scaling decision"
+                                      " if management type is prometheus_metric_api")
+    argument_parser.add_argument('-ln', '--label-name', dest=LABEL_NAME, required=False,
+                                 type=str,
+                                 help="<Optional> Enter a label name for scaling decision"
+                                      " if management type is prometheus_metric_api")
+    argument_parser.add_argument('-lv', '--label-value', dest=LABEL_VALUE, required=False,
+                                 type=str,
+                                 help="<Optional> Enter a label value for scaling decision"
+                                      " if management type is prometheus_metric_api")
+    argument_parser.add_argument('-sotv', '--scaling-out-threshold-value', dest=SCALING_OUT_THRESHOLD_VALUE,
+                                 required=False, type=str,
+                                 help="<Optional> Enter a scaling out threshold value for scaling decision"
+                                      " if management type is prometheus_metric_api")
+    argument_parser.add_argument('-sitv', '--scaling-in-threshold-value', dest=SCALING_IN_THRESHOLD_VALUE,
+                                 required=False, type=str,
+                                 help="<Optional> Enter a scaling in threshold value for scaling decision"
+                                      " if management type is prometheus_metric_api")
 
     args = vars(argument_parser.parse_args())
     return args
@@ -79,11 +113,19 @@ class Run:
         self.scaling_range = parameters[SCALING_RANGE]
         self.max_number = parameters[MAX_NUMBER]
         self.min_number = parameters[MIN_NUMBER]
+        # Prometheus parameters
         self.host = parameters[HOST]
         self.port = parameters[PORT]
+        # Prometheus alert api parameters
         self.scaling_out_name = parameters[SCALING_OUT_NAME]
         self.scaling_in_name = parameters[SCALING_IN_NAME]
         self.time_interval = parameters[TIME_INTERVAL]
+        # Prometheus metric api parameters
+        self.metric_name = parameters[METRIC_NAME]
+        self.label_name = parameters[LABEL_NAME]
+        self.label_value = parameters[LABEL_VALUE]
+        self.scaling_out_threshold_value = parameters[SCALING_OUT_THRESHOLD_VALUE]
+        self.scaling_in_threshold_value = parameters[SCALING_IN_THRESHOLD_VALUE]
 
         # Logging
         self.logger = logging.getLogger('Run')
@@ -134,6 +176,28 @@ class Run:
                 manager.control_alert_and_trigger_scaling()
                 self.logger.info(f"Waiting {self.time_interval} seconds for the next query if alarm is firing")
                 sleep(self.time_interval)
+        elif self.management_type == 'prometheus_metric_api':
+
+            """
+            python3 run.py
+            -w Deployment -n php-apache -ns default -s 1 -max 10 -min 2 -ti 60
+            -mt prometheus_metric_api -ph localhost -pp 9090
+            -mn apache_accesses_total -lb kubernetes_name -lv apache-exporter
+            -sotv 
+            """
+
+            self.logger.info(f"Scaling workload for {self.name} (namespace: {self.namespace}, "
+                             f"workload: {self.workload}) is started. Management type is "
+                             f"{self.management_type}. Make sure that always have two alert in Prometheus "
+                             f"for scaling out and scaling in. Each scaling alert workload will change "
+                             f"the pod {self.scaling_range} number amount of pod. (host: {self.host}, "
+                             f"port: {self.port}, scaling_out_name: {self.scaling_out_name}, "
+                             f"scaling_in_name: {self.scaling_in_name})")
+            manager = PrometheusMetricAPI(
+
+            )
+            while True:
+                manager
         else:
             self.logger.error(f"Not valid management_type: {self.management_type}")
             raise Exception("Not valid management_type")
