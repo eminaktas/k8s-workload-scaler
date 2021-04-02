@@ -9,7 +9,14 @@ class WorkloadScaler(Kubectl):
     WorkloadScaler class
     """
 
-    def __init__(self, workload, name, namespace, scaling_range, max_number, min_number):
+    def __init__(
+            self,
+            workload: str = None,
+            name: str = None,
+            namespace: str = None,
+            scaling_range: int = None,
+            max_number: int = None,
+            min_number: int = None):
         self.workload = workload
         self.name = name
         self.namespace = namespace

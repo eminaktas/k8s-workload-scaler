@@ -1,5 +1,6 @@
 from k8s_workload_scaler.workload_scaler import WorkloadScaler
 from prometheus_api_client import PrometheusConnect
+from time import sleep
 
 import logging
 
@@ -17,27 +18,27 @@ class PrometheusMetricAPI(WorkloadScaler):
 
     def __init__(
             self,
-            workload,
-            name,
-            namespace,
-            scaling_range,
-            max_number,
-            min_number,
-            host,
-            port,
-            metric_name,
-            label_name,
-            label_value,
-            scaling_out_threshold_value,
-            scaling_in_threshold_value,
+            workload: str = None,
+            name: str = None,
+            namespace: str = None,
+            scaling_range: int = None,
+            max_number: int = None,
+            min_number: int = None,
+            host: str = None,
+            port: str = None,
+            metric_name: str = None,
+            label_list: dict = None,
+            scaling_out_threshold_value: float = None,
+            scaling_in_threshold_value: float = None,
+            rate_time: int = None,
     ):
         self.host = host
         self.port = port
         self.metric_name = metric_name
         self.scaling_in_threshold_value = scaling_in_threshold_value
         self.scaling_out_threshold_value = scaling_out_threshold_value
-        self.label_value = label_value
-        self.label_name = label_name
+        self.label_list = label_list,
+        self.rate_time = rate_time
         WorkloadScaler.__init__(self, workload, name, namespace, scaling_range, max_number, min_number)
 
         # Logging
@@ -48,9 +49,7 @@ class PrometheusMetricAPI(WorkloadScaler):
             datefmt='%Y-%m-%d %H:%M:%S'
         )
 
-    # TODO: define get_metric_custom function for custom queries
-
-    def get_metric(self):
+    def get_one_metric(self):
         """
         Get defined metric from Prometheus API
         """
@@ -58,37 +57,63 @@ class PrometheusMetricAPI(WorkloadScaler):
             url = f"http://{self.host}:{self.port}"
             self.logger.info(f"Getting metrics from Prometheus (url={url})")
             prom = PrometheusConnect(url=url, disable_ssl=True)
-            label_config = {self.label_name: self.label_value}
-            metrics = prom.get_current_metric_value(metric_name=self.metric_name, label_config=label_config)
+            metrics = prom.get_current_metric_value(metric_name=self.metric_name, label_config=self.label_list)
             self.logger.debug(f"{metrics}")
             return metrics
         except Exception as e:
             self.logger.error(f"Exception at get_metric: {e}")
             return None
 
-    def control_scaling(self):
+    def rate_metrics(self):
+        """
+        Calculate the rate of the metrics
+        last value - first value / time(seconds)
+        """
+
+        first_metrics = self.get_one_metric()
+        if not first_metrics:
+            self.logger.error(f"Metrics not found: {self.metric_name}{self.label_list} in Prometheus")
+            return None
+
+        # Wait for rate calculation
+        sleep(self.rate_time)
+
+        last_metrics = self.get_one_metric()
+        if not last_metrics:
+            self.logger.error(f"Metrics not found: {self.metric_name}{self.label_list} in Prometheus")
+            return None
+
+        first_metric_count = len(first_metrics)
+        last_metric_count = len(last_metrics)
+
+        first_total = 0
+        last_total = 0
+        for f, l in zip(first_metrics, last_metrics):
+            first_total += float(f['value'][1])
+            last_total += float(l['value'][1])
+
+        first_avg_total = first_total / first_metric_count
+        last_avg_total = last_total / last_metric_count
+
+        return (last_avg_total - first_avg_total) / self.rate_time
+
+    def control_and_trigger_scaling(self):
         """
         Controls scaling if there is any violation of threshold
         """
         self.logger.info(f"Controlling for scaling if there is any violation")
-        metrics = self.get_metric()
-        if metrics:
-            metric_count = len(metrics)
-            total = 0
-            for _ in metrics:
-                # The value of metric
-                total += float(_['value'][1])
-            avg_total = total / metric_count
-
-            if avg_total > self.scaling_out_threshold_value:
-                self.logger.info(f"Violation detected ({avg_total} > {self.scaling_out_threshold_value})")
+        rate = self.rate_metrics()
+        if rate:
+            if rate > self.scaling_out_threshold_value:
+                self.logger.info(f"Violation detected ({rate} > {self.scaling_out_threshold_value})")
                 self.logger.info("The scaling out is triggered")
                 self.scale(f"scaling_out")
-            elif avg_total < self.scaling_in_threshold_value:
-                print(f"Violation detected ({avg_total} < {self.scaling_in_threshold_value})")
+            elif rate < self.scaling_in_threshold_value:
+                print(f"Violation detected ({rate} < {self.scaling_in_threshold_value})")
                 self.logger.info("The scaling in is triggered")
                 self.scale(f"scaling_in")
             else:
                 print("Violation not detected")
         else:
-            self.logger.debug(f"Not found: {self.metric_name}[{self.label_name}={self.label_value}] in Prometheus API")
+            self.logger.error(f"Rate cannot be calculated: {self.metric_name}{self.label_list} not "
+                              f"found in Prometheus")

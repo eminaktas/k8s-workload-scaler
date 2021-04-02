@@ -21,16 +21,16 @@ class PrometheusAlertAPI(WorkloadScaler):
 
     def __init__(
             self,
-            workload,
-            name,
-            namespace,
-            scaling_range,
-            max_number,
-            min_number,
-            host,
-            port,
-            scaling_out_name,
-            scaling_in_name,
+            workload: str = None,
+            name: str = None,
+            namespace: str = None,
+            scaling_range: int = None,
+            max_number: int = None,
+            min_number: int = None,
+            host: str = None,
+            port: str = None,
+            scaling_out_name: str = None,
+            scaling_in_name: str = None,
     ):
         self.host = host
         self.port = port

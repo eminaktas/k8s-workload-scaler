@@ -1,0 +1,87 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: k8s-workload-scaler
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: k8s-workload-scaler
+subjects:
+- kind: ServiceAccount
+  name: k8s-workload-scaler
+  apiGroup: ""
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: ""
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k8s-workload-scaler
+  namespace: monitoring
+spec:
+  serviceAccountName: k8s-workload-scaler
+  restartPolicy: Always
+  securityContext:
+    runAsUser: 0
+    fsGroup: 0
+  containers:
+    - name: k8s-workload-scaler
+      image: eminaktas/k8s-workload-scaler
+      imagePullPolicy: IfNotPresent
+      command: ["/bin/sh"]
+      args:
+        - -c
+        - >-
+            python3 /usr/workload-scaler/k8s_workload_scaler/run.py
+            -w $(workload)
+            -n $(scale-name)
+            -ns $(namespace)
+            -s $(scaling-number)
+            -max $(max-pod-number)
+            -min $(min-pod-number)
+            -ti $(time-interval)
+            $(management-type)
+            -mn $(metric-name)
+            -l $(label-1)
+            -l $(label-2)
+            -sotv $(scaling-out-threshold-value)
+            -sitv $(scaling-in-threshold-value)
+            -r $(rate_value)
+      env:
+        - name: workload
+          value: "Deployment"
+        - name: scale-name
+          value: "php-apache"
+        - name: namespace
+          value: "default"
+        - name: scaling-number
+          value: "1"
+        - name: max-pod-number
+          value: "10"
+        - name: min-pod-number
+          value: "2"
+        - name: time-interval
+          value: "60"
+        - name: management-type
+          value: "prometheus_metric_api"
+        - name: prometheus-host
+          value: "prometheus-service"
+        - name: prometheus-port
+          value: "8080"
+        - name: metric-name
+          value: "apache_accesses_total"
+        - name: label-1
+          value: "kubernetes_name=apache-exporter"
+        - name: label-2
+          value: "run=php-apache"
+        - name: scaling-out-threshold-value
+          value: "0.8"
+        - name: scaling-in-threshold-value
+          value: "0.2"
+        - name: rate_value
+          value: "300" # 5 min

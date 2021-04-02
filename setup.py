@@ -8,7 +8,7 @@ with open(os.path.join(here, 'README.md')) as readme_file:
 
 setup(
     name='k8s-workload-scaler',
-    version='0.0.0',
+    version='0.0.1',
     packages=['k8s_workload_scaler'],
     url='github.com/eminaktas/k8s-workload-scaler',
     license='MIT',
@@ -19,7 +19,7 @@ setup(
     install_requires=[
         'setuptools~=54.2.0',
         'kubernetes~=12.0.1',
-        'requests~=2.25.1'
+        'requests~=2.25.1',
+        'prometheus-api-client~=0.4.2',
     ]
-
 )

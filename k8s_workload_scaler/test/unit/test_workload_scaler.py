@@ -75,8 +75,10 @@ class ScaleTestCase(WorkloadScalerTestCase):
         mock_scale_workload.assert_not_called()
 
     @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.control_replicas')
-    def test_scale_exception(self, mock_control_replicas):
-        self.assertRaises(Exception, self.workload_scaler.scale)
+    @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.scale_workload')
+    def test_scale_exception(self, mock_scale_workload, mock_control_replicas):
+        mock_scale_workload.side_effect = Exception
+        self.assertRaises(Exception, self.workload_scaler.scale('scaling_in'))
 
     # @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.control_replicas')
     # @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.scale_workload')
