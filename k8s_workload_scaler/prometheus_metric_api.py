@@ -109,11 +109,11 @@ class PrometheusMetricAPI(WorkloadScaler):
                 self.logger.info("The scaling out is triggered")
                 self.scale(f"scaling_out")
             elif rate < self.scaling_in_threshold_value:
-                print(f"Violation detected ({rate} < {self.scaling_in_threshold_value})")
+                self.logger.info(f"Violation detected ({rate} < {self.scaling_in_threshold_value})")
                 self.logger.info("The scaling in is triggered")
                 self.scale(f"scaling_in")
             else:
-                print("Violation not detected")
+                self.logger.info("Violation not detected")
         else:
             self.logger.error(f"Rate cannot be calculated: {self.metric_name}{self.label_list} not "
                               f"found in Prometheus")
