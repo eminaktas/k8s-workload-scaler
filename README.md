@@ -1,7 +1,6 @@
 # Kubernetes Workload Scaler
 
-This intended to run on a K8s Workload to scale the specific deployment with 
-various way.
+This intended to run as a controller to scale the specific deployment with various way.
 
 ## Supported methods to scale workload and Usage
 
@@ -72,6 +71,8 @@ kubectl apply -f https://raw.githubusercontent.com/eminaktas/k8s-workload-scaler
 It will simply chekcs the Prometheus API and if receives a firing alarm it will trigger regarding the scaling type 
 (we must define scaling: in and scaling: out labels) 
 
+### 2- Prometheus Metric API:
+TODO
 ## Supported Worklodas
 ```python3
 SUPPORTED_WORKLOAD = [
