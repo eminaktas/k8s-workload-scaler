@@ -216,7 +216,7 @@ class Run:
             while True:
                 manager.control_and_trigger_scaling()
                 self.logger.info(f"Waiting {self.time_interval} seconds for the next query if there is any"
-                                 f"violation")
+                                 f" violation")
                 sleep(self.time_interval)
         else:
             self.logger.error(f"Not valid management_type: {self.management_type}")

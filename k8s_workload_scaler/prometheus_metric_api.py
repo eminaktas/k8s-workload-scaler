@@ -37,7 +37,7 @@ class PrometheusMetricAPI(WorkloadScaler):
         self.metric_name = metric_name
         self.scaling_in_threshold_value = scaling_in_threshold_value
         self.scaling_out_threshold_value = scaling_out_threshold_value
-        self.label_list = label_list,
+        self.label_list = label_list
         self.rate_time = rate_time
         WorkloadScaler.__init__(self, workload, name, namespace, scaling_range, max_number, min_number)
 

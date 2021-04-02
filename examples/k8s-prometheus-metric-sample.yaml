@@ -67,7 +67,7 @@ spec:
         - name: min-pod-number
           value: "2"
         - name: time-interval
-          value: "60"
+          value: "0"
         - name: management-type
           value: "prometheus_metric_api"
         - name: prometheus-host
