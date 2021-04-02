@@ -132,6 +132,12 @@ class Run:
             self.scaling_in_threshold_value = parameters[SCALING_IN_THRESHOLD_VALUE]
             self.rate_value = parameters[RATE_VALUE]
 
+        self.common_log = f"Scaling workload for {self.name} (namespace: {self.namespace}, " \
+                          f"workload: {self.workload}) is started. Management type is "\
+                          f"{self.management_type}. Make sure that always have two alert in Prometheus "\
+                          f"for scaling out and scaling in. Each scaling alert workload will change "\
+                          f"the pod {self.scaling_range} number amount of pod. "
+
         # Logging
         self.logger = logging.getLogger('Run')
         logging.basicConfig(
@@ -156,13 +162,9 @@ class Run:
             -son php-apache-scaling-out -sin php-apache-scaling-in
             """
 
-            self.logger.info(f"Scaling workload for {self.name} (namespace: {self.namespace}, "
-                             f"workload: {self.workload}) is started. Management type is "
-                             f"{self.management_type}. Make sure that always have two alert in Prometheus "
-                             f"for scaling out and scaling in. Each scaling alert workload will change "
-                             f"the pod {self.scaling_range} number amount of pod. (host: {self.host}, "
-                             f"port: {self.port}, scaling_out_name: {self.scaling_out_name}, "
-                             f"scaling_in_name: {self.scaling_in_name})")
+            self.logger.info(self.common_log + f"(host: {self.host}, port: {self.port}, "
+                                               f"scaling_out_name: {self.scaling_out_name}, "
+                                               f"scaling_in_name: {self.scaling_in_name})")
 
             manager = PrometheusAlertAPI(
                 self.workload,
@@ -191,13 +193,11 @@ class Run:
             -sotv 0.8 -sitv 0.2 -r 300
             """
 
-            self.logger.info(f"Scaling workload for {self.name} (namespace: {self.namespace}, "
-                             f"workload: {self.workload}) is started. Management type is "
-                             f"{self.management_type}. Make sure that always have two alert in Prometheus "
-                             f"for scaling out and scaling in. Each scaling alert workload will change "
-                             f"the pod {self.scaling_range} number amount of pod. (host: {self.host}, "
-                             f"port: {self.port}, scaling_out_name: {self.scaling_out_name}, "
-                             f"scaling_in_name: {self.scaling_in_name})")
+            self.logger.info(self.common_log + f"(host: {self.host}, port: {self.port}, "
+                                               f"metric_name: {self.metric_name}, labels: {self.label_list}, "
+                                               f"scaling_out_threshold_value: {self.scaling_out_threshold_value}, "
+                                               f"scaling_in_threshold_value: {self.scaling_in_threshold_value}, "
+                                               f"range_value:{self.rate_value})")
             manager = PrometheusMetricAPI(
                 self.workload,
                 self.name,
