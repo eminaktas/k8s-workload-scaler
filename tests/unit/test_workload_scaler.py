@@ -80,13 +80,13 @@ class ScaleTestCase(WorkloadScalerTestCase):
         mock_scale_workload.side_effect = Exception
         self.assertRaises(Exception, self.workload_scaler.scale('scaling_in', 'cluster_name'))
 
-    # @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.control_replicas')
-    # @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.scale_workload')
-    # def test_scale_success(self, mock_scale_workload, mock_control_replicas):
-    #     mock_control_replicas.return_value = 5
-    #     mock_scale_workload.return_value = {
-    #         'old_replicas': 2,
-    #         'new_replicas': 5
-    #     }
-    #     result = self.workload_scaler.scale('scale_out')
-    #     self.assertEqual(result, {'old_replicas': 2, 'new_replicas': 5})
+    @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.control_replicas')
+    @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.scale_workload')
+    def test_scale_success(self, mock_scale_workload, mock_control_replicas):
+        mock_control_replicas.return_value = 5
+        mock_scale_workload.return_value = {
+            'old_replicas': 2,
+            'new_replicas': 5
+        }
+        result = self.workload_scaler.scale('scale_out')
+        self.assertEqual(result, {'old_replicas': 2, 'new_replicas': 5})

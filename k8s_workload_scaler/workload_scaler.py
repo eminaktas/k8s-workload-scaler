@@ -89,6 +89,7 @@ class WorkloadScaler(Kubectl):
         """
         Scales the target workload
         """
+        result = None
         self.logger.info(f"Scaling {self.name} (namespace: {self.namespace}, workload: {self.workload})")
 
         new_replica_number = self.control_replicas(scaling, cluster_name)
@@ -105,3 +106,5 @@ class WorkloadScaler(Kubectl):
                                  f"{result['old_replicas']} to {result['new_replicas']}")
         except Exception as e:
             self.logger.error(f"Exception at scale: {e}")
+        finally:
+            return result
