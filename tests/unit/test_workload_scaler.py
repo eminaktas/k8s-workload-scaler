@@ -23,37 +23,37 @@ class ControlReplicasTest(WorkloadScalerTestCase):
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
     def test_control_replica_out(self, mock_get_replica_info):
         mock_get_replica_info.return_value = {'replicas': 5}
-        result = self.workload_scaler.control_replicas('scaling_out')
+        result = self.workload_scaler.control_replicas('scaling_out', 'cluster_name')
         self.assertEqual(result, 6)
 
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
     def test_control_replica_in(self, mock_get_replica_info):
         mock_get_replica_info.return_value = {'replicas': 5}
-        result = self.workload_scaler.control_replicas('scaling_in')
+        result = self.workload_scaler.control_replicas('scaling_in', 'cluster_name')
         self.assertEqual(result, 4)
 
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
     def test_control_replica_min(self, mock_get_replica_info):
         mock_get_replica_info.return_value = {'replicas': 2}
-        result = self.workload_scaler.control_replicas('scaling_in')
+        result = self.workload_scaler.control_replicas('scaling_in', 'cluster_name')
         self.assertEqual(result, None)
 
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
     def test_control_replica_less_min(self, mock_get_replica_info):
         mock_get_replica_info.return_value = {'replicas': 0}
-        result = self.workload_scaler.control_replicas('scaling_in')
+        result = self.workload_scaler.control_replicas('scaling_in', 'cluster_name')
         self.assertEqual(result, 2)
 
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
     def test_control_replica_max(self, mock_get_replica_info):
         mock_get_replica_info.return_value = {'replicas': 10}
-        result = self.workload_scaler.control_replicas('scaling_out')
+        result = self.workload_scaler.control_replicas('scaling_out', 'cluster_name')
         self.assertEqual(result, None)
 
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
     def test_control_replica_more_max(self, mock_get_replica_info):
         mock_get_replica_info.return_value = {'replicas': 12}
-        result = self.workload_scaler.control_replicas('scaling_out')
+        result = self.workload_scaler.control_replicas('scaling_out', 'cluster_name')
         self.assertEqual(result, 10)
 
     @mock.patch('k8s_workload_scaler.workload_scaler.Kubectl.get_replica_info')
@@ -71,14 +71,14 @@ class ScaleTestCase(WorkloadScalerTestCase):
     def test_scale_none(self, mock_scale_workload, mock_control_replicas):
         mock_control_replicas.return_value = None
         mock_scale_workload = mock.Mock()
-        self.workload_scaler.scale('scaling_out')
+        self.workload_scaler.scale('scaling_out', 'cluster_name')
         mock_scale_workload.assert_not_called()
 
     @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.control_replicas')
     @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.scale_workload')
     def test_scale_exception(self, mock_scale_workload, mock_control_replicas):
         mock_scale_workload.side_effect = Exception
-        self.assertRaises(Exception, self.workload_scaler.scale('scaling_in'))
+        self.assertRaises(Exception, self.workload_scaler.scale('scaling_in', 'cluster_name'))
 
     # @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.control_replicas')
     # @mock.patch('k8s_workload_scaler.workload_scaler.WorkloadScaler.scale_workload')

@@ -58,6 +58,7 @@ class PrometheusAlertAPITestCase(TestCase):
             1,
             10,
             2,
+            'kube-config',
             'prometheus',
             '9090',
             'scaling-out-name',

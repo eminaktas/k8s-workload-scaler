@@ -15,6 +15,7 @@ MAX_NUMBER = 'max_number'
 MIN_NUMBER = 'min_number'
 TIME_INTERVAL = 'delay'
 MANAGEMENT_TYPE = 'management_type'
+KUBE_CONFIG = 'kube_config'
 
 # PROMETHEUS HOST INFORMATION
 HOST = 'host'
@@ -58,6 +59,9 @@ def parse_args():
                                  help="Enter maximum number of Pods")
     argument_parser.add_argument('-min', '--min-number', dest=MIN_NUMBER, required=True, type=int,
                                  help="Enter minimum number of Pods")
+    argument_parser.add_argument('-kc', '--kube-config', dest=KUBE_CONFIG, required=True,
+                                 default='/etc/kube/config', type=str,
+                                 help="Enter config file path")
     argument_parser.add_argument('-ti', '--time-interval', dest=TIME_INTERVAL, required=False, default=60,
                                  type=float, help="Enter a time for alert control interval. "
                                                   "Default value is 60 seconds")
@@ -118,6 +122,7 @@ class Run:
         self.max_number = parameters[MAX_NUMBER]
         self.min_number = parameters[MIN_NUMBER]
         self.time_interval = parameters[TIME_INTERVAL]
+        self.kube_config = parameters[KUBE_CONFIG]
         if self.management_type == 'prometheus_alert_api':
             self.host = parameters[HOST]
             self.port = parameters[PORT]
@@ -136,7 +141,8 @@ class Run:
                           f"workload: {self.workload}) is started. Management type is "\
                           f"{self.management_type}. Make sure that always have two alert in Prometheus "\
                           f"for scaling out and scaling in. Each scaling alert workload will change "\
-                          f"the pod {self.scaling_range} number amount of pod. "
+                          f"the pod {self.scaling_range} number amount of pod. kube-config file location: " \
+                          f"{self.kube_config}"
 
         # Logging
         self.logger = logging.getLogger('Run')
@@ -173,6 +179,7 @@ class Run:
                 self.scaling_range,
                 self.max_number,
                 self.min_number,
+                self.kube_config,
                 self.host,
                 self.port,
                 self.scaling_out_name,
@@ -205,6 +212,7 @@ class Run:
                 self.scaling_range,
                 self.max_number,
                 self.min_number,
+                self.kube_config,
                 self.host,
                 self.port,
                 self.metric_name,

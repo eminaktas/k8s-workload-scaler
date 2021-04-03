@@ -16,7 +16,9 @@ class WorkloadScaler(Kubectl):
             namespace: str = None,
             scaling_range: int = None,
             max_number: int = None,
-            min_number: int = None):
+            min_number: int = None,
+            kube_config: str = None,
+    ):
         self.workload = workload
         self.name = name
         self.namespace = namespace
@@ -25,7 +27,7 @@ class WorkloadScaler(Kubectl):
         self.min_number = min_number
 
         # Parent class
-        Kubectl.__init__(self)
+        Kubectl.__init__(self, kube_config)
 
         # Logging
         self.logger = logging.getLogger("WorkloadScaler")
@@ -35,7 +37,7 @@ class WorkloadScaler(Kubectl):
             datefmt='%Y-%m-%d %H:%M:%S'
         )
 
-    def control_replicas(self, scaling):
+    def control_replicas(self, scaling, cluster_name: str = None):
         """
         Controls the replica information from the workload
         """
@@ -43,7 +45,7 @@ class WorkloadScaler(Kubectl):
             self.logger.info(f"Getting information for {self.name} (namespace: {self.namespace}, "
                              f"workload: {self.workload})")
             # Get the replica information from the workload
-            replica_info = self.get_replica_info(self.workload, self.name, self.namespace)
+            replica_info = self.get_replica_info(self.workload, self.name, self.namespace, cluster_name)
 
             if replica_info:
                 # Replica number of the workload
@@ -83,13 +85,13 @@ class WorkloadScaler(Kubectl):
             self.logger.error(f"Exception at control_replicas: {e}")
             return None
 
-    def scale(self, scaling):
+    def scale(self, scaling, cluster_name: str = None):
         """
         Scales the target workload
         """
         self.logger.info(f"Scaling {self.name} (namespace: {self.namespace}, workload: {self.workload})")
 
-        new_replica_number = self.control_replicas(scaling)
+        new_replica_number = self.control_replicas(scaling, cluster_name)
 
         if new_replica_number is None:
             self.logger.warning(f"Scaling {self.name} (namespace: {self.namespace}, "

@@ -12,6 +12,7 @@ class PrometheusMeticAPITestCase(TestCase):
             1,
             10,
             2,
+            'kube-config',
             'prometheus',
             '9090',
             'metric-name',

@@ -27,6 +27,7 @@ class PrometheusAlertAPI(WorkloadScaler):
             scaling_range: int = None,
             max_number: int = None,
             min_number: int = None,
+            kube_config: str = None,
             host: str = None,
             port: str = None,
             scaling_out_name: str = None,
@@ -36,7 +37,7 @@ class PrometheusAlertAPI(WorkloadScaler):
         self.port = port
         self.scaling_out_name = scaling_out_name
         self.scaling_in_name = scaling_in_name
-        WorkloadScaler.__init__(self, workload, name, namespace, scaling_range, max_number, min_number)
+        WorkloadScaler.__init__(self, workload, name, namespace, scaling_range, max_number, min_number, kube_config)
 
         # Logging
         self.logger = logging.getLogger("PrometheusAlertAPI")
@@ -64,7 +65,7 @@ class PrometheusAlertAPI(WorkloadScaler):
                              _alert['labels']['alertname'] == self.scaling_in_name))
             if alert['state'] == 'firing':
                 self.logger.info("Prometheus alert is firing, the scaling is triggered")
-                self.scale(f"scaling_{alert['labels']['scaling']}")
+                self.scale(f"scaling_{alert['labels']['scaling']}", alert['labels'].get('cluster_name', None))
             else:
                 self.logger.info("Prometheus alert is not firing, scaling not triggered")
                 self.logger.info(f"Current metric value {alert['value']}")

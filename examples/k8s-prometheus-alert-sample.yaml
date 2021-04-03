@@ -19,6 +19,14 @@ roleRef:
   apiGroup: ""
 ---
 apiVersion: v1
+kind: Secret
+metadata:
+  name: kube-config-file
+stringData:
+  config: |
+    # Put the content of the .kube/config file here
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: k8s-workload-scaler
@@ -28,10 +36,17 @@ spec:
   securityContext:
     runAsUser: 0
     fsGroup: 0
+  volumes:
+  - name: kube-config-file
+    secret:
+      secretName: kube-config-file
   containers:
     - name: k8s-workload-scaler
       image: eminaktas/k8s-workload-scaler
       imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - name: kube-config-file
+          mountPath: /etc/kube/
       command: ["/bin/sh"]
       args:
         - -c
@@ -44,6 +59,7 @@ spec:
             -max $(max-pod-number)
             -min $(min-pod-number)
             -ti $(time-interval)
+            -kc $(kube-config)
             $(management-type)
             -ph $(prometheus-host)
             -pp $(prometheus-port)
@@ -64,6 +80,8 @@ spec:
           value: "2"
         - name: time-interval
           value: "60"
+        - name: kube-config
+          value: "/etc/kube/config"
         - name: management-type
           value: "prometheus_alert_api"
         - name: prometheus-host

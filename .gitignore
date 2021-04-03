@@ -2,5 +2,5 @@
 /.idea/
 /k8s_workload_scaler/__pycache__
 /k8s_workload_scaler.egg-info/
-/k8s_workload_scaler/test/__pycache__/
-/k8s_workload_scaler/test/unit/__pycache__/
+/tests/__pycache__/
+/tests/unit/__pycache__/
