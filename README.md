@@ -77,6 +77,9 @@ kubectl apply -f https://raw.githubusercontent.com/eminaktas/k8s-workload-scaler
 ```
 Then,
 ```bash
+kubectl create secret generic kube-config-file --from-file=config=$HOME/.kube/config
+```
+```bash
 kubectl apply -f https://raw.githubusercontent.com/eminaktas/k8s-workload-scaler/main/examples/k8s-prometheus-sample.yaml
 ```
 It will simply chekcs the Prometheus API and if receives a firing alarm it will trigger regarding the scaling type 
@@ -128,6 +131,9 @@ your Prometheus collecting metrics.
 kubectl apply -f https://raw.githubusercontent.com/eminaktas/k8s-workload-scaler/main/examples/php-apache-sample.yaml
 ```
 Then,
+```bash
+kubectl create secret generic kube-config-file --from-file=config=$HOME/.kube/config
+```
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/eminaktas/k8s-workload-scaler/main/examples/k8s-prometheus-metric-sample.yaml
 ```
