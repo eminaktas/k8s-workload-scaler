@@ -33,6 +33,7 @@ class Kubectl:
         try:
             # Load the context in kube-config file
             contexts, active_context = config.list_kube_config_contexts(config_file=self.kube_config)
+            config.load_incluster_config()
             self.logger.debug(f"contexts: {contexts}, active_context: {active_context}")
             if not contexts:
                 self.logger.error("Cannot locate any context in kube-config file")
@@ -51,10 +52,10 @@ class Kubectl:
 
             return {
                 'core_v1': client.CoreV1Api(
-                    api_client=config.new_client_from_config(context=picked_cluster)
+                    api_client=config.new_client_from_config(config_file=self.kube_config, context=picked_cluster)
                 ),
                 'apps_v1': client.AppsV1Api(
-                    api_client=config.new_client_from_config(context=picked_cluster)
+                    api_client=config.new_client_from_config(config_file=self.kube_config, context=picked_cluster)
                 ),
             }
         except Exception as e:
