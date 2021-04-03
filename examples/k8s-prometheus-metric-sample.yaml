@@ -19,14 +19,6 @@ roleRef:
   apiGroup: ""
 ---
 apiVersion: v1
-kind: Secret
-metadata:
-  name: kube-config-file
-stringData:
-  config: |
-    # Put the content of the .kube/config file here
----
-apiVersion: v1
 kind: Pod
 metadata:
   name: k8s-workload-scaler
